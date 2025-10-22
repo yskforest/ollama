@@ -8,6 +8,9 @@ docker compose compose up -d
 
 docker compose exec ollama bash
 ollama pull gemma3:12B
+
+# imageの更新
+ollama list | tail -n +2 | awk '{print $1}' | xargs -n1 ollama pull
 ```
 
 ## vscodeでの設定
