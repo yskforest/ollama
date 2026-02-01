@@ -35,6 +35,14 @@ Ollamaでプル済みの全モデルを更新する場合:
 docker compose exec ollama bash -c "ollama list | tail -n +2 | awk '{print $1}' | xargs -n1 ollama pull"
 ```
 
+### コンテクスト長の変更
+```bash
+ollama show gpt-oss:20b-131k
+ollama run gpt-oss:20b
+/set parameter num_ctx 131072
+/save gpt-oss:20b-131k
+```
+
 ## IDE設定
 
 ### VS Code

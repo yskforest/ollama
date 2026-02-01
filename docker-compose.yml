@@ -6,6 +6,8 @@ services:
       - "11434:11434"
     volumes:
       - ./volumes/ollama:/root/.ollama
+    environment:
+      - OLLAMA_NUM_CTX=131072
     tty: true
     stdin_open: true
     healthcheck:
@@ -57,11 +59,23 @@ services:
     volumes:
       - ./volumes/notebook_data:/app/data
       - ./volumes/surreal_single_data:/mydata
+    restart: always
     networks:
       - ollama-network
     depends_on:
       ollama:
         condition: service_healthy
+
+  opencode:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    network_mode: "host"
+    tty: true
+    stdin_open: true
 
 networks:
   ollama-network:
