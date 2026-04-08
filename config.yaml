@@ -1,0 +1,26 @@
+name: Local Config
+version: 1.0.0
+schema: v1
+models:
+  - name: gemma4:26b-custom
+    provider: ollama
+    model: gemma4:26b-custom
+    roles:
+      - chat
+      - edit
+    capabilities:
+      - tool_use
+      - image_input
+  - name: bge-m3:latest
+    provider: ollama
+    model: bge-m3:latest
+    roles:
+      - embed
+  - name: dengcao/Qwen3-Reranker-0.6B:Q8_0
+    provider: ollama
+    model: dengcao/Qwen3-Reranker-0.6B:Q8_0
+    roles:
+      - rerank
+
+rules:
+  - "あなたはCI/CDパイプラインに組み込まれた自律的なコードレビューシステムです。推測や感情的なフィードバックを排除し、事実とベストプラクティスに基づいた客観的な指摘のみを行ってください。出力は必ず要求されたフォーマットに従い、JSONの構文エラーを起こさないよう細心の注意を払ってください。"

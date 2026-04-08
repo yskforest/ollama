@@ -51,3 +51,63 @@ ollama run gpt-oss:20b
 ## 参考
 - [Ollama Library](https://ollama.com/library)
   - Ollamaで利用可能なモデルの一覧
+
+### opencode/crush
+- 下記３つある
+  - https://github.com/anomalyco/opencode
+  - https://github.com/charmbracelet/crush
+  - https://github.com/opencode-ai/opencode
+- anomalyco/opencodeが無難と思われる
+
+## continueの設定
+```yml
+name: Local Config
+version: 1.0.0
+schema: v1
+models:
+  - name: gpt-oss:20b
+    provider: ollama
+    model: gpt-oss:20b
+    roles:
+      - chat
+      - edit
+      - apply
+  - name: qwen2.5-coder:1.5b
+    provider: ollama
+    model: qwen2.5-coder:1.5b
+    roles:
+      - autocomplete
+  - name: bge-m3:latest
+    provider: ollama
+    model: bge-m3:latest
+    roles:
+      - embed
+```
+
+```bash
+cn --config config.json -p "現在のリポジトリの最新のコミット内容を確認し、内容を.mdファイルに保存してください。"
+```
+
+```Dockerfile
+# ベースモデルとしてQ4_K_M量子化されたQwen2.5-Coder-32Bを指定
+FROM qwen2.5-coder:32b-instruct-q4_K_M
+
+# RTX 3090の24GB VRAMに確実に収めつつ、実用的な長文脈を維持するため
+# コンテキスト長を16,384トークンに厳密にハードコードする。
+# これにより、OpenCodeからの呼び出し時もこのコンテキストが適用される。
+PARAMETER num_ctx 16384
+
+# コーディングタスクにおいては、幻覚（Hallucination）を抑え、
+# 決定論的で予測可能な論理展開、および正確なJSONフォーマットの出力を促すため、
+# temperatureを低く設定する。推奨値は0.0〜0.1の範囲である。
+PARAMETER temperature 0.1
+
+# コード生成において重要なシンボル（括弧やセミコロン）や
+# 共通の構文パターンが不自然に抑制されるのを防ぐため、
+# 繰り返しペナルティ(repeat_penalty)はデフォルトの1.1付近か、わずかに下げる。
+PARAMETER repeat_penalty 1.05
+
+# エージェントが大規模なコードブロックや複雑なツール呼び出しのJSONを生成する際に、
+# 出力が途中で切り捨てられる（Truncation）のを防ぐため、出力トークンの上限を増枠する。
+PARAMETER num_predict 8192
+```
