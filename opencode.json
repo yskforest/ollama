@@ -8,13 +8,17 @@
                 "baseURL": "http://localhost:11434/v1",
             },
             "models": {
-                "gpt-oss:20b-131k": {
-                    "name": "gpt-oss:20b-131k",
-                    "tools": true
-                },
                 "qwen2.5-coder:14b": {
                     "name": "qwen2.5-coder:14b",
-                    "tools": true
+                    "tools": true,
+                    "options": {
+                        "max_tokens": 8192,
+                        "num_ctx": 32768
+                    }
+                },
+                "gemma4:26b-ci": {
+                    "name": "gemma4:26b-ci",
+                    "tools": true,
                 },
                 "deepseek-r1:14b": {
                     "name": "deepseek-r1:14b",
@@ -34,5 +38,5 @@
             "format*": "deny"
         }
     },
-    "model": "ollama/gpt-oss:20b-131k",
+    "model": "ollama/gemma4:26b-ci"
 }

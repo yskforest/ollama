@@ -5,6 +5,7 @@ services:
     ports:
       - "11434:11434"
     volumes:
+      - .:/workspace
       - ./volumes/ollama:/root/.ollama
     environment:
       - OLLAMA_NUM_CTX=131072

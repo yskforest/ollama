@@ -2,9 +2,9 @@ name: Local Config
 version: 1.0.0
 schema: v1
 models:
-  - name: gemma4:26b-custom
+  - name: gemma4:26b-ci
     provider: ollama
-    model: gemma4:26b-custom
+    model: gemma4:26b-ci
     roles:
       - chat
       - edit
