@@ -73,6 +73,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - .:/workspace
+      - ./opencode.json:/home/ubuntu/.config/opencode/opencode.json
     working_dir: /workspace
     network_mode: "host"
     tty: true
