@@ -1,0 +1,26 @@
+# Modelfile テンプレート
+# 使い方: このファイルを modelfile/<モデル名>.Modelfile としてコピー・調整し、以下で作成します
+#   ./scripts/create_models.sh <モデル名>
+
+FROM <base-model:tag>
+
+# コンテキスト長（VRAM容量と OLLAMA_KV_CACHE_TYPE に応じて調整）
+PARAMETER num_ctx 65536
+# 最大出力トークン数
+PARAMETER num_predict 16384
+# プロンプト処理のバッチサイズ（VRAMに余裕があれば 512、抑えるなら 256）
+PARAMETER num_batch 512
+# 全層をGPUにオフロード
+PARAMETER num_gpu 999
+
+# サンプリング設定（モデルの推奨値に合わせて調整）
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 20
+PARAMETER min_p 0.05
+PARAMETER repeat_penalty 1.0
+
+# 必要に応じてシステムプロンプトを指定
+# SYSTEM """
+# あなたは日本語で回答するコーディングアシスタントです。
+# """

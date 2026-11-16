@@ -8,7 +8,12 @@ services:
       - .:/workspace
       - ./volumes/ollama:/root/.ollama
     environment:
-      - OLLAMA_NUM_CTX=131072
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_FLASH_ATTENTION=1 # Flash Attention 有効化（長文の高速化とVRAM削減）
+      - OLLAMA_KV_CACHE_TYPE=q8_0 # KVキャッシュを8bit量子化（VRAM消費を約半減、精度劣化は極小）
+      - OLLAMA_NUM_PARALLEL=1 #並列推論を無効化（VRAM節約、推論安定）
+      - OLLAMA_MAX_LOADED_MODELS=1 # 単一モデル・単一並列に限定してVRAMをこのモデルに全振りする
+      - OLLAMA_KEEP_ALIVE=30m
     tty: true
     stdin_open: true
     healthcheck:
@@ -20,13 +25,15 @@ services:
       resources:
         reservations:
           devices:
-            - capabilities: [ gpu ]
+            - driver: nvidia # ← NVIDIAドライバーを明示
+              count: all # ← "gpus all" に相当。すべてのGPUを割り当て
+              capabilities: [ gpu ]
     restart: always
     networks:
       - ollama-network
 
   openwebui:
-    image: ghcr.io/open-webui/open-webui
+    image: openwebui/open-webui:latest-cuda
     container_name: openwebui
     ports:
       - "8081:8080"
@@ -37,6 +44,13 @@ services:
     restart: always
     networks:
       - ollama-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
     depends_on:
       ollama:
         condition: service_healthy
@@ -48,6 +62,7 @@ services:
       - "5055:5055"
       - "8000:8000"
     environment:
+      - OPEN_NOTEBOOK_ENCRYPTION_KEY=onote
       - OLLAMA_API_BASE=http://ollama:11434
       # API Server connection
       - API_URL=http://localhost:5055
@@ -74,6 +89,8 @@ services:
     volumes:
       - .:/workspace
       - ./opencode.json:/home/ubuntu/.config/opencode/opencode.json
+      # 必要に応じてホスト側の解析対象ディレクトリをマウント
+      # - /path/to/your/code:/code
     working_dir: /workspace
     network_mode: "host"
     tty: true

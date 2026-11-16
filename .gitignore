@@ -1,1 +1,18 @@
+# データ・作業用ディレクトリ
 /volumes
+/tmp
+/workspace_temp
+/logs
+
+# 環境変数・ログ
+.env
+*.log
+
+# Python / ツール一時ファイル
+__pycache__/
+*.py[cod]
+.venv/
+
+# OS 生成ファイル
+.DS_Store
+Thumbs.db

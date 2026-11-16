@@ -5,24 +5,29 @@
             "npm": "@ai-sdk/openai-compatible",
             "name": "Ollama (local)",
             "options": {
-                "baseURL": "http://localhost:11434/v1",
+                "baseURL": "http://localhost:11434/v1"
             },
             "models": {
-                "qwen2.5-coder:14b": {
-                    "name": "qwen2.5-coder:14b",
-                    "tools": true,
-                    "options": {
-                        "max_tokens": 8192,
-                        "num_ctx": 32768
-                    }
-                },
-                "gemma4:26b-ci": {
-                    "name": "gemma4:26b-ci",
-                    "tools": true,
-                },
-                "deepseek-r1:14b": {
-                    "name": "deepseek-r1:14b",
+                "bonsai-2:27b-agent": {
+                    "name": "bonsai-2:27b-agent",
                     "tools": true
+                }
+            }
+        },
+        "llama-local": {
+            "npm": "@ai-sdk/openai-compatible",
+            "name": "llama.cpp (local)",
+            "options": {
+                "baseURL": "http://localhost:30000/v1",
+                "apiKey": "llama-api"
+            },
+            "models": {
+                "bonsai-2-27b": {
+                    "name": "Ternary Bonsai 2 27B",
+                    "limit": {
+                        "context": 147456,
+                        "output": 8192
+                    }
                 }
             }
         }
@@ -38,5 +43,5 @@
             "format*": "deny"
         }
     },
-    "model": "ollama/gemma4:26b-ci"
+    "model": "ollama/bonsai-2:27b-agent"
 }

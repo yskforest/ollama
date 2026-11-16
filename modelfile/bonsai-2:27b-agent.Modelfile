@@ -1,0 +1,32 @@
+FROM bonsai-2:27b
+
+# --- コンテキスト・メモリ・推論性能（RTX 4080 16GB 向け） ---
+# OLLAMA_KV_CACHE_TYPE=q8_0 前提で 100% GPU に収まる 128K 上限（実測 VRAM 約 13GB）
+PARAMETER num_ctx 131072
+# 思考＋コード出力を賄いつつ、長考暴走時の長時間待ち（旧 32768 で約16分）を防ぐ上限
+PARAMETER num_predict 16384
+# 大規模コード読み込み（Prompt Eval）を高速化する標準値（VRAM 逼迫時は 256）
+PARAMETER num_batch 512
+# 全層を GPU にオフロードし、意図しない CPU フォールバックを防止
+PARAMETER num_gpu 999
+
+# --- サンプリング設定（Bonsai-2 / Qwen3.8 Thinking 推奨ベース＋Agent 向け微調整） ---
+# 公式 Thinking 推奨 (1.0) より少し抑え、ツール呼び出し精度と収束性を両立（0.2 以下はループしやすいため回避）
+PARAMETER temperature 0.6
+# Bonsai-2 (Qwen3.8) Thinking モード公式推奨値
+PARAMETER top_p 0.95
+# Bonsai-2 (Qwen3.8) Thinking モード公式推奨値
+PARAMETER top_k 20
+# Bonsai-2 (Qwen3.8) Thinking モード公式推奨値（低確率ノイズトークンの除外）
+PARAMETER min_p 0.05
+# 思考の無限ループを抑えつつ、コードや JSON の構文（変数名等の反復）を壊さない最小限のペナルティ
+PARAMETER repeat_penalty 1.05
+# 長い思考でも直近の重複フレーズを検知できるよう、デフォルト (64) から拡張
+PARAMETER repeat_last_n 256
+
+# 過剰な長考による num_predict 枯渇（空応答）を防ぎ、速やかにツール呼び出しへ移行させる指示
+SYSTEM """
+あなたはVS Code上のコーディングAgentです。
+思考（thinking）は要点のみ数行で簡潔に終え、長い検討や自己確認の繰り返しをしないでください。
+思考を終えたら直ちにツール呼び出しまたは最終回答を出力してください。
+"""
