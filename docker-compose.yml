@@ -82,6 +82,26 @@ services:
       ollama:
         condition: service_healthy
 
+  # ollama-proxy:
+  #   image: python:3.12-slim
+  #   container_name: ollama-proxy
+  #   ports:
+  #     - "11435:11435"
+  #   volumes:
+  #     - ./proxy/ollama_think_proxy.py:/app/ollama_think_proxy.py:ro
+  #   environment:
+  #     - OLLAMA_UPSTREAM_URL=http://ollama:11434
+  #     - PROXY_PORT=11435
+  #     - THINK_MODE=false # false: thinking無効 / low, medium, high: 思考強度指定
+  #     # - TARGET_MODELS=bonsai-2:27b-agent # 空なら全モデルに適用
+  #   command: [ "python3", "/app/ollama_think_proxy.py" ]
+  #   restart: always
+  #   networks:
+  #     - ollama-network
+  #   depends_on:
+  #     ollama:
+  #       condition: service_healthy
+
   cliagent:
     build:
       context: .
