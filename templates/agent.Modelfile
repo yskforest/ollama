@@ -2,6 +2,9 @@
 # 使い方: このファイルを modelfile/<モデル名>.Modelfile としてコピー・調整し、以下で作成します
 #   ./scripts/create_models.sh <モデル名>
 
+# Hugging Face の GGUF を使う場合は、部分一致による別量子化の誤取得を防ぐため
+# ファイル名まで明示することを推奨します:
+#   FROM hf.co/<org>/<repo>:<exact-filename>.gguf
 FROM <base-model:tag>
 
 # コンテキスト長（VRAM容量と OLLAMA_KV_CACHE_TYPE に応じて調整）

@@ -75,8 +75,8 @@ class OllamaProxyHandler(BaseHTTPRequestHandler):
         if TARGET_MODELS and model_name not in TARGET_MODELS:
             return body
 
-        # クライアントが明示指定していない場合のみ上書き（強制上書きしたい場合は常に設定）
-        payload["think"] = THINK_VALUE
+        # クライアントが明示指定していない場合のみデフォルトの think 値を付与する
+        payload.setdefault("think", THINK_VALUE)
         return json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
     def _forward(self):
@@ -93,6 +93,7 @@ class OllamaProxyHandler(BaseHTTPRequestHandler):
             forward_headers["Content-Length"] = str(len(req_body))
 
         conn = http.client.HTTPConnection(UPSTREAM_HOST, UPSTREAM_PORT, timeout=900)
+        headers_sent = False
         try:
             conn.request(self.command, self.path, body=req_body or None, headers=forward_headers)
             resp = conn.getresponse()
@@ -112,9 +113,16 @@ class OllamaProxyHandler(BaseHTTPRequestHandler):
                     has_content_length = True
                 self.send_header(k, v)
 
-            if is_chunked or not has_content_length:
+            no_body = self.command == "HEAD" or resp.status in (204, 304) or 100 <= resp.status < 200
+
+            if no_body:
+                self.end_headers()
+                headers_sent = True
+                resp.read()
+            elif is_chunked or not has_content_length:
                 self.send_header("Transfer-Encoding", "chunked")
                 self.end_headers()
+                headers_sent = True
                 while True:
                     # read1() でバッファリングを最小化し、到着したチャンクを即座に転送する
                     chunk = resp.read1(8192)
@@ -128,12 +136,16 @@ class OllamaProxyHandler(BaseHTTPRequestHandler):
                 self.wfile.flush()
             else:
                 self.end_headers()
+                headers_sent = True
                 data = resp.read()
                 if data:
                     self.wfile.write(data)
                 self.wfile.flush()
         except Exception as exc:
-            self.send_error(502, f"Upstream Ollama error: {exc}")
+            if not headers_sent:
+                self.send_error(502, f"Upstream Ollama error: {exc}")
+            else:
+                self.log_message("stream interrupted: %s", exc)
         finally:
             conn.close()
 
@@ -150,6 +162,9 @@ class OllamaProxyHandler(BaseHTTPRequestHandler):
         self._forward()
 
     def do_DELETE(self):
+        self._forward()
+
+    def do_OPTIONS(self):
         self._forward()
 
 
