@@ -3,10 +3,12 @@ FROM bonsai-2:27b
 # --- コンテキスト・メモリ・推論性能（RTX 4080 16GB 向け） ---
 # OLLAMA_KV_CACHE_TYPE=q8_0 前提で 100% GPU に収まる 128K 上限（実測 VRAM 約 13GB）
 PARAMETER num_ctx 131072
+# PARAMETER num_ctx 262144 # 24GB
 # 思考＋コード出力を賄いつつ、長考暴走時の長時間待ち（旧 32768 で約16分）を防ぐ上限
 PARAMETER num_predict 16384
 # 大規模コード読み込み（Prompt Eval）を高速化する標準値（VRAM 逼迫時は 256）
 PARAMETER num_batch 512
+# PARAMETER num_batch 1024 # 24GB
 # 全層を GPU にオフロードし、意図しない CPU フォールバックを防止
 PARAMETER num_gpu 999
 
@@ -23,10 +25,3 @@ PARAMETER min_p 0.05
 PARAMETER repeat_penalty 1.05
 # 長い思考でも直近の重複フレーズを検知できるよう、デフォルト (64) から拡張
 PARAMETER repeat_last_n 256
-
-# 過剰な長考による num_predict 枯渇（空応答）を防ぎ、速やかにツール呼び出しへ移行させる指示
-SYSTEM """
-あなたはVS Code上のコーディングAgentです。
-思考（thinking）は要点のみ数行で簡潔に終え、長い検討や自己確認の繰り返しをしないでください。
-思考を終えたら直ちにツール呼び出しまたは最終回答を出力してください。
-"""

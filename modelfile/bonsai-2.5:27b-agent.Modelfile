@@ -1,0 +1,24 @@
+FROM hf.co/prism-ml/Ternary-Bonsai-2.5-27B-GGUF:Ternary-Bonsai-2.5-27B-Q2_0.gguf
+
+# --- コンテキスト・メモリ・推論性能（RTX 4080 16GB 向け） ---
+# OLLAMA_KV_CACHE_TYPE=q8_0 前提で 100% GPU に収まる 128K 設定
+PARAMETER num_ctx 131072
+# PARAMETER num_ctx 262144 # VRAM24GB
+# 公式推奨の xhigh 思考＋コード出力を途中で切らない上限
+PARAMETER num_predict 16384
+# 大規模コード読み込み（Prompt Eval）向け（VRAM 逼迫時は 256）
+PARAMETER num_batch 512
+# PARAMETER num_batch 1024 # VRAM24GB
+# 全層を GPU にオフロードし、CPU フォールバックを防止
+PARAMETER num_gpu 999
+
+# --- サンプリング設定（Bonsai 2.5 Thinking 公式推奨ベース） ---
+# 公式推奨 1.0（エージェント挙動の安定性重視なら 0.6〜0.8 に調整）
+PARAMETER temperature 1.0
+PARAMETER top_p 0.95
+PARAMETER top_k 20
+# 公式で明示的に 0.0 指定が推奨されている（0.05 は外す）
+PARAMETER min_p 0.0
+# 公式推奨 1.0（Ollama デフォルト 1.1 を無効化。ループ時のみ 1.05 へ）
+PARAMETER repeat_penalty 1.0
+PARAMETER repeat_last_n 256
